@@ -1,38 +1,37 @@
 #!/bin/bash
 
-sudo apt-get update -y
 
-if ! command -v docker &> /dev/null; then
-    echo "Docker not found. Installing..."
-    curl -fsSL https://get.docker.com -o get-docker.sh && sudo sh get-docker.sh
+echo "Installing Python (3.9+)"
+
+# Variables
+PYTHON_MAJOR=$(python3 -c 'import sys; print(sys.version_info.major)' 2>/dev/null || echo 0)
+PYTHON_MINOR=$(python3 -c 'import sys; print(sys.version_info.minor)' 2>/dev/null || echo 0)
+
+# Compare verisons
+if [ "$PYTHON_MAJOR" -eq 3 -a "$PYTHON_MINOR" -ge 9 ] || [ "$PYTHON_MAJOR" -gt 3 ]; then
+    echo "Python is already installed. Current version: $PYTHON_MAJOR.$PYTHON_MINOR (Satisfies requirement >= 3.9)"
 else
-    echo "Docker installed: $(docker --version)"
+    echo "Python is missing or older than 3.9. Installing..."
+    
+    sudo apt-get update -y -qq
+    sudo apt-get install -y -qq software-properties-common
+    sudo add-apt-repository -y ppa:deadsnakes/ppa
+    sudo apt-get update -y -qq
+    
+    sudo apt-get install -y -qq python3.9 python3.9-dev python3-pip
+    echo "Python 3.9 installed."
 fi
 
-if ! docker compose version &> /dev/null; then
-    echo "Docker Compose not found. Installing..."
-    sudo apt-get install -y docker-compose-plugin
+echo -e "Installing Django"
+
+# Check if Django is available in the system
+if python3 -c "import django" &> /dev/null; then
+    echo "Django is already installed in the system. Skipping."
 else
-    echo "Docker Compose already installed: $(docker compose version)"
+    echo "Django not found. Installing via pip..."
+    pip3 install --quiet django
+    echo "Django has been successfully installed."
 fi
 
-if ! command -v python3 &> /dev/null; then
-    echo "Python3 not found. Installing..."
-    sudo apt-get install -y python3 python3-pip python3-venv
-else
-    echo "Python3 already installed: $(python3 --version)"
-fi
-
-mkdir -p my_django_project && cd my_django_project
-
-if [ ! -d "venv" ]; then
-    echo "Creating environment variable venv..."
-    python3 -m venv venv
-fi
-
-source venv/bin/activate
-
-pip install --upgrade pip
-pip install django
-
-echo "Finish"
+echo -e "Check version of Django"
+python3 -m django --version
