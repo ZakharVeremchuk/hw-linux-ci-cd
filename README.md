@@ -13,7 +13,8 @@ This project creates a simple AWS infrastructure with Terraform.
 Run these commands from the project root:
 
 ```bash
-terraform init
+terraform init -backend=false
+terraform init -reconfigure
 terraform plan
 terraform apply
 terraform destroy
@@ -23,3 +24,5 @@ terraform destroy
 - s3-backend: creates the S3 bucket and DynamoDB table used for Terraform state.
 - vpc: creates a VPC with public and private subnets.
 - ecr: creates an ECR repository with image scanning enabled.
+
+aws eks --region us-east-1 update-kubeconfig --name eks-cluster-demo
