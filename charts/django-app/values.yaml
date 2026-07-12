@@ -1,0 +1,29 @@
+replicaCount: 2
+
+image:
+  repository: 339284816865.dkr.ecr.us-east-1.amazonaws.com/lesson-5-ecr
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: LoadBalancer
+  port: 80
+  targetPort: 8000
+
+# Env vars from topic 4 (.env). Without a working POSTGRES_HOST
+# Django falls back to SQLite (see goit/settings.py).
+config:
+  DJANGO_SETTINGS_MODULE: "goit.settings"
+  DEBUG: "True"
+  POSTGRES_PORT: "5432"
+  POSTGRES_NAME: "postgres"
+  POSTGRES_DB: "postgres"
+  POSTGRES_USER: "postgres"
+  POSTGRES_PASSWORD: "postgres"
+  POSTGRES_ENGINE: "django.db.backends.postgresql"
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 70
